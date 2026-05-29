@@ -234,7 +234,7 @@
 // ============================================================
 // ⚙️ CONFIG — แก้ตรงนี้ให้ตรงกับ host.html
 // ============================================================
-const SCRIPT_URL = "YOUR_GOOGLE_APPS_SCRIPT_URL_HERE";
+const SCRIPT_URL = "https://chantimas.github.io/airspacesafety/participant.html";
 // ============================================================
 
 const LETTERS = ["A","B","C","D","E"];
@@ -356,7 +356,7 @@ function showAnsweredResult(answer, q) {
   showScreen("result");
 }
 
-if(SCRIPT_URL !== "YOUR_GOOGLE_APPS_SCRIPT_URL_HERE") {
+if(SCRIPT_URL !== "https://chantimas.github.io/airspacesafety/participant.html") {
   poll();
   pollInterval = setInterval(poll, 3000);
 } else {
