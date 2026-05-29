@@ -510,7 +510,7 @@
 // ⚙️ CONFIG — แก้ตรงนี้
 // ============================================================
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby_dhdIt0uCOBln8cdLK2pO9tNrucIZStUpYt3ABvgg0h3u_YO5ZNIEzcFGs8MB8N0z/exec";
-const PARTICIPANT_URL = "https://chantimas.github.io/airspacesafety/participant.html"; // URL ของ participant.html ที่ host ไว้
+const PARTICIPANT_URL = "https://curious-cactus-05ed53.netlify.app/participant.html";
 // ============================================================
 
 const LETTERS = ["A","B","C","D","E"];
@@ -641,7 +641,7 @@ function initLiveTab() {
   sel.innerHTML = `<option value="">— เลือก Session —</option>` +
     sessions.map((s,i) => `<option value="${i}">${i+1}. ${s.topic||"Session "+(i+1)}</option>`).join("");
 
-  const pUrl = PARTICIPANT_URL !== "https://chantimas.github.io/airspacesafety/participant.html" ? PARTICIPANT_URL : null;
+  const pUrl = PARTICIPANT_URL;
   if(pUrl) {
     document.getElementById("joinUrl").textContent = pUrl;
     if(document.getElementById("qrCode").classList.contains("qr-placeholder")) {
@@ -845,10 +845,6 @@ async function viewSummary() {
 
 // ---- API ----
 async function apiCall(params) {
-  if(SCRIPT_URL === "https://script.google.com/macros/s/AKfycby_dhdIt0uCOBln8cdLK2pO9tNrucIZStUpYt3ABvgg0h3u_YO5ZNIEzcFGs8MB8N0z/exec") {
-    document.getElementById("configNotice").style.display = "block";
-    return {};
-  }
   document.getElementById("configNotice").style.display = "none";
   try {
     const url = SCRIPT_URL + "?" + new URLSearchParams(params);
