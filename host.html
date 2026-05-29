@@ -1,0 +1,882 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Airspace Safety Seminar Seminar — Host Panel</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0e1a;
+    --surface: #111827;
+    --surface2: #1a2236;
+    --border: rgba(255,255,255,0.08);
+    --border2: rgba(255,255,255,0.15);
+    --text: #e8edf5;
+    --muted: #6b7a96;
+    --accent: #3b82f6;
+    --accent2: #60a5fa;
+    --green: #10b981;
+    --amber: #f59e0b;
+    --red: #ef4444;
+    --pre: #818cf8;
+    --post: #34d399;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'IBM Plex Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    font-size: 14px;
+  }
+  header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 14px 28px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .logo span { color: var(--text); font-weight: 500; }
+  .status-pill {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    padding: 5px 12px;
+    border-radius: 20px;
+    border: 1px solid var(--border2);
+    color: var(--muted);
+  }
+  .dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--muted);
+  }
+  .dot.live { background: var(--green); box-shadow: 0 0 6px var(--green); animation: pulse 1.5s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+  .main { display: grid; grid-template-columns: 300px 1fr; height: calc(100vh - 53px); }
+
+  .sidebar {
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    overflow-y: auto;
+    padding: 20px 0;
+  }
+  .sidebar-section { padding: 0 16px 16px; }
+  .sidebar-label {
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 10px;
+    padding: 0 4px;
+  }
+  .session-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.15s;
+    margin-bottom: 2px;
+  }
+  .session-item:hover { background: var(--surface2); }
+  .session-item.active { background: rgba(59,130,246,0.12); border: 1px solid rgba(59,130,246,0.25); }
+  .session-num {
+    width: 26px; height: 26px;
+    border-radius: 6px;
+    background: var(--surface2);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px;
+    font-family: 'IBM Plex Mono', monospace;
+    color: var(--muted);
+    flex-shrink: 0;
+  }
+  .session-item.active .session-num { background: var(--accent); color: #fff; }
+  .session-info { flex: 1; min-width: 0; }
+  .session-title { font-size: 13px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .session-badges { display: flex; gap: 4px; margin-top: 3px; }
+  .badge {
+    font-size: 10px;
+    padding: 2px 7px;
+    border-radius: 4px;
+    font-weight: 500;
+  }
+  .badge.pre { background: rgba(129,140,248,0.15); color: var(--pre); }
+  .badge.post { background: rgba(52,211,153,0.15); color: var(--post); }
+  .badge.done { background: rgba(107,122,150,0.15); color: var(--muted); }
+
+  .content { overflow-y: auto; padding: 28px; }
+
+  .setup-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 20px;
+  }
+  .card-title {
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+  input[type="text"], textarea, select {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border2);
+    border-radius: 8px;
+    padding: 10px 14px;
+    color: var(--text);
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  input[type="text"]:focus, textarea:focus { border-color: var(--accent); }
+  textarea { min-height: 80px; resize: vertical; }
+  .form-row { margin-bottom: 14px; }
+  label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 6px; }
+
+  .options-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }
+  .option-row { display: flex; gap: 8px; align-items: center; }
+  .option-letter {
+    width: 28px; height: 28px;
+    border-radius: 6px;
+    background: var(--surface2);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px;
+    font-family: 'IBM Plex Mono', monospace;
+    color: var(--muted);
+    flex-shrink: 0;
+  }
+  .option-row.correct .option-letter { background: rgba(16,185,129,0.2); color: var(--green); }
+  .option-row input { flex: 1; }
+  .correct-toggle {
+    width: 28px; height: 28px;
+    border-radius: 6px;
+    border: 1px solid var(--border2);
+    background: transparent;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--muted);
+    font-size: 16px;
+    transition: all 0.15s;
+    flex-shrink: 0;
+  }
+  .correct-toggle.active { background: rgba(16,185,129,0.2); border-color: var(--green); color: var(--green); }
+
+  .btn-row { display: flex; gap: 8px; flex-wrap: wrap; }
+  .btn {
+    padding: 9px 18px;
+    border-radius: 8px;
+    border: none;
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .btn:active { transform: scale(0.97); }
+  .btn-primary { background: var(--accent); color: #fff; }
+  .btn-primary:hover { background: #2563eb; }
+  .btn-ghost { background: var(--surface2); color: var(--text); border: 1px solid var(--border2); }
+  .btn-ghost:hover { border-color: var(--border); background: rgba(255,255,255,0.05); }
+  .btn-green { background: rgba(16,185,129,0.15); color: var(--green); border: 1px solid rgba(16,185,129,0.3); }
+  .btn-green:hover { background: rgba(16,185,129,0.25); }
+  .btn-red { background: rgba(239,68,68,0.12); color: var(--red); border: 1px solid rgba(239,68,68,0.25); }
+  .btn-red:hover { background: rgba(239,68,68,0.22); }
+  .btn-sm { padding: 6px 12px; font-size: 12px; }
+
+  .live-panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 20px;
+  }
+  .live-header {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .live-title { font-size: 15px; font-weight: 500; }
+  .type-badge {
+    font-size: 11px;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+  }
+  .type-badge.pre { background: rgba(129,140,248,0.15); color: var(--pre); border: 1px solid rgba(129,140,248,0.3); }
+  .type-badge.post { background: rgba(52,211,153,0.15); color: var(--post); border: 1px solid rgba(52,211,153,0.3); }
+
+  .live-body { padding: 20px; }
+  .question-text { font-size: 16px; font-weight: 400; line-height: 1.6; margin-bottom: 20px; }
+
+  .chart-area { display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px; }
+  .bar-row { display: grid; grid-template-columns: 28px 1fr 50px; align-items: center; gap: 10px; }
+  .bar-label {
+    font-size: 12px;
+    font-family: 'IBM Plex Mono', monospace;
+    color: var(--muted);
+    text-align: center;
+  }
+  .bar-wrap { height: 32px; background: var(--surface2); border-radius: 6px; overflow: hidden; position: relative; }
+  .bar-fill {
+    height: 100%;
+    border-radius: 6px;
+    transition: width 0.5s ease;
+    display: flex; align-items: center; padding-left: 10px;
+    font-size: 12px; font-weight: 500; color: rgba(255,255,255,0.9);
+    min-width: 0;
+  }
+  .bar-fill.correct-bar { background: rgba(16,185,129,0.6); }
+  .bar-fill.wrong-bar { background: rgba(59,130,246,0.4); }
+  .bar-fill.neutral-bar { background: rgba(99,102,241,0.4); }
+  .bar-count { font-size: 13px; color: var(--muted); text-align: right; font-family: 'IBM Plex Mono', monospace; }
+
+  .stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; }
+  .stat-box {
+    background: var(--surface2);
+    border-radius: 8px;
+    padding: 14px;
+    text-align: center;
+  }
+  .stat-num { font-size: 28px; font-weight: 300; font-family: 'IBM Plex Mono', monospace; }
+  .stat-label { font-size: 11px; color: var(--muted); margin-top: 2px; letter-spacing: 0.05em; }
+
+  .comparison-area {
+    background: var(--surface2);
+    border-radius: 10px;
+    padding: 18px;
+    margin-bottom: 20px;
+  }
+  .comparison-title {
+    font-size: 12px;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 14px;
+  }
+  .comp-bar-row { margin-bottom: 10px; }
+  .comp-labels { display: flex; justify-content: space-between; font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+  .comp-bars { display: flex; flex-direction: column; gap: 4px; }
+  .comp-bar { height: 24px; border-radius: 4px; display: flex; align-items: center; padding: 0 8px; font-size: 11px; font-weight: 500; transition: width 0.5s ease; }
+  .comp-bar.pre-bar { background: rgba(129,140,248,0.35); color: #c4b8ff; }
+  .comp-bar.post-bar { background: rgba(52,211,153,0.35); color: #6ee7b7; }
+
+  .qr-section { text-align: center; padding: 20px; }
+  .qr-placeholder {
+    width: 160px; height: 160px;
+    border: 2px dashed var(--border2);
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 12px;
+    color: var(--muted);
+    font-size: 12px;
+  }
+  .join-url {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 13px;
+    color: var(--accent2);
+    word-break: break-all;
+    background: var(--surface2);
+    padding: 8px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+  }
+
+  .tabs { display: flex; gap: 2px; margin-bottom: 20px; background: var(--surface2); border-radius: 10px; padding: 4px; }
+  .tab {
+    flex: 1; text-align: center; padding: 8px; border-radius: 7px;
+    font-size: 13px; cursor: pointer; color: var(--muted); transition: all 0.15s;
+  }
+  .tab.active { background: var(--surface); color: var(--text); font-weight: 500; }
+
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+
+  #toast {
+    position: fixed; bottom: 24px; right: 24px;
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-radius: 10px;
+    padding: 12px 20px;
+    font-size: 13px;
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.3s;
+    z-index: 100;
+  }
+  #toast.show { opacity: 1; }
+
+  .config-notice {
+    background: rgba(245,158,11,0.1);
+    border: 1px solid rgba(245,158,11,0.3);
+    border-radius: 10px;
+    padding: 14px 18px;
+    font-size: 13px;
+    color: #fcd34d;
+    margin-bottom: 20px;
+    line-height: 1.6;
+  }
+  code { font-family: 'IBM Plex Mono', monospace; background: rgba(255,255,255,0.08); padding: 2px 6px; border-radius: 4px; font-size: 12px; }
+  .divider { height: 1px; background: var(--border); margin: 16px 0; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">Airspace Safety Seminar <span>// Host Panel</span></div>
+  <div class="status-pill">
+    <div class="dot" id="connDot"></div>
+    <span id="connText">Not connected</span>
+  </div>
+</header>
+
+<div class="main">
+  <div class="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-label">Sessions</div>
+      <div id="sessionList"></div>
+    </div>
+  </div>
+
+  <div class="content">
+    <div class="config-notice" id="configNotice">
+      ⚠️ ยังไม่ได้ตั้งค่า Script URL — เปิดไฟล์นี้ใน text editor แล้วแก้ <code>SCRIPT_URL</code> บรรทัดแรกของ &lt;script&gt; ให้เป็น URL จาก Google Apps Script ของคุณ
+    </div>
+
+    <div class="tabs">
+      <div class="tab active" onclick="switchTab('setup')">ตั้งค่าคำถาม</div>
+      <div class="tab" onclick="switchTab('live')">Live Control</div>
+      <div class="tab" onclick="switchTab('results')">ผลลัพธ์</div>
+      <div class="tab" onclick="switchTab('export')">Export</div>
+    </div>
+
+    <!-- Setup Tab -->
+    <div id="tab-setup" class="tab-content active">
+      <div class="setup-card">
+        <div class="card-title">Session ที่กำลังแก้ไข: <span id="editingSession" style="color:var(--accent2)">— เลือก session จากซ้าย</span></div>
+        <div class="form-row">
+          <label>ชื่อหัวข้อ Session</label>
+          <input type="text" id="sessionTopic" placeholder="เช่น ICAO Annex 10 — Aeronautical Telecommunications">
+        </div>
+        <div class="divider"></div>
+        <div style="margin-bottom:12px; font-size:13px; color:var(--muted)">Pre-test Question</div>
+        <div class="form-row">
+          <label>คำถาม</label>
+          <textarea id="preQuestion" placeholder="พิมพ์คำถาม pre-test ที่นี่..."></textarea>
+        </div>
+        <div class="form-row">
+          <label>ตัวเลือก (คลิก ✓ เพื่อทำเครื่องหมายคำตอบที่ถูก)</label>
+          <div class="options-list" id="preOptions"></div>
+          <button class="btn btn-ghost btn-sm" onclick="addOption('pre')">+ เพิ่มตัวเลือก</button>
+        </div>
+        <div class="divider"></div>
+        <div style="margin-bottom:12px; font-size:13px; color:var(--muted)">Post-test Question</div>
+        <div style="display:flex; align-items:center; gap:10px; margin-bottom:12px;">
+          <label style="margin:0; cursor:pointer; display:flex; align-items:center; gap:6px;">
+            <input type="checkbox" id="sameAsPost" onchange="toggleSameAsPost()"> ใช้คำถามเดิมกับ pre-test
+          </label>
+        </div>
+        <div id="postFields">
+          <div class="form-row">
+            <label>คำถาม</label>
+            <textarea id="postQuestion" placeholder="พิมพ์คำถาม post-test ที่นี่..."></textarea>
+          </div>
+          <div class="form-row">
+            <label>ตัวเลือก</label>
+            <div class="options-list" id="postOptions"></div>
+            <button class="btn btn-ghost btn-sm" onclick="addOption('post')">+ เพิ่มตัวเลือก</button>
+          </div>
+        </div>
+        <div class="btn-row" style="margin-top:16px">
+          <button class="btn btn-primary" onclick="saveSession()">💾 บันทึก Session นี้</button>
+          <button class="btn btn-ghost" onclick="clearSession()">ล้าง</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Live Tab -->
+    <div id="tab-live" class="tab-content">
+      <div style="display:grid; grid-template-columns:1fr 240px; gap:20px;">
+        <div>
+          <div class="live-panel">
+            <div class="live-header">
+              <div>
+                <div class="live-title" id="liveSessionTitle">— ยังไม่ได้เปิดคำถาม</div>
+                <div style="font-size:12px; color:var(--muted); margin-top:3px" id="liveSessionSub"></div>
+              </div>
+              <span class="type-badge pre" id="typeBadge">PRE</span>
+            </div>
+            <div class="live-body">
+              <div class="question-text" id="liveQuestion">เลือก session และกด "เปิดคำถาม" เพื่อเริ่ม</div>
+              <div class="chart-area" id="liveChart"></div>
+              <div class="stats-row">
+                <div class="stat-box"><div class="stat-num" id="statTotal">0</div><div class="stat-label">RESPONSES</div></div>
+                <div class="stat-box"><div class="stat-num" id="statCorrect">—</div><div class="stat-label">CORRECT %</div></div>
+                <div class="stat-box"><div class="stat-num" id="statTime">—</div><div class="stat-label">ELAPSED</div></div>
+              </div>
+              <div class="comparison-area" id="comparisonArea" style="display:none">
+                <div class="comparison-title">Before / After Comparison</div>
+                <div id="compBars"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="btn-row">
+            <button class="btn btn-green" id="btnOpen" onclick="openPoll()">▶ เปิดคำถาม Pre-test</button>
+            <button class="btn btn-red" id="btnClose" onclick="closePoll()" disabled>⏹ ปิดคำถาม</button>
+            <button class="btn btn-ghost" id="btnNext" onclick="nextPhase()" disabled>ถัดไป →</button>
+          </div>
+        </div>
+
+        <div>
+          <div class="setup-card">
+            <div class="card-title">Join</div>
+            <div class="qr-section">
+              <div id="qrCode" class="qr-placeholder">QR Code<br>(ต้องตั้งค่า URL)</div>
+              <div class="join-url" id="joinUrl" onclick="copyUrl()" title="คลิกเพื่อคัดลอก">—</div>
+              <div style="font-size:11px; color:var(--muted); margin-top:8px">คลิกเพื่อคัดลอก link</div>
+            </div>
+          </div>
+
+          <div class="setup-card">
+            <div class="card-title">Session Control</div>
+            <div style="display:flex; flex-direction:column; gap:8px;">
+              <select id="sessionSelect" onchange="selectLiveSession(this.value)" style="margin-bottom:4px">
+                <option value="">— เลือก Session —</option>
+              </select>
+              <button class="btn btn-ghost btn-sm" onclick="refreshResults()">⟳ รีเฟรช</button>
+              <button class="btn btn-ghost btn-sm" onclick="showComparison()">📊 แสดง Comparison</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Results Tab -->
+    <div id="tab-results" class="tab-content">
+      <div class="setup-card">
+        <div class="card-title">สรุปผลทั้งหมด</div>
+        <div id="allResults" style="color:var(--muted); font-size:13px">กด "โหลดผลลัพธ์" เพื่อดูข้อมูล</div>
+        <div class="btn-row" style="margin-top:16px">
+          <button class="btn btn-primary" onclick="loadAllResults()">โหลดผลลัพธ์</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Export Tab -->
+    <div id="tab-export" class="tab-content">
+      <div class="setup-card">
+        <div class="card-title">Export ข้อมูล</div>
+        <p style="color:var(--muted); font-size:13px; margin-bottom:16px; line-height:1.6">ดาวน์โหลดข้อมูลทั้งหมดเป็นไฟล์ CSV สำหรับนำไปวิเคราะห์ใน Excel</p>
+        <div class="btn-row">
+          <button class="btn btn-primary" onclick="exportCSV()">⬇ Download CSV</button>
+          <button class="btn btn-ghost" onclick="viewSummary()">📋 ดูสรุปหน้านี้</button>
+        </div>
+        <div id="summaryView" style="margin-top:20px"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script>
+// ============================================================
+// ⚙️ CONFIG — แก้ตรงนี้
+// ============================================================
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby_dhdIt0uCOBln8cdLK2pO9tNrucIZStUpYt3ABvgg0h3u_YO5ZNIEzcFGs8MB8N0z/exec";
+const PARTICIPANT_URL = "https://chantimas.github.io/airspacesafety/participant.html"; // URL ของ participant.html ที่ host ไว้
+// ============================================================
+
+const LETTERS = ["A","B","C","D","E"];
+let sessions = JSON.parse(localStorage.getItem("quizSessions") || "null") || initSessions();
+let currentEditSession = 0;
+let liveSession = null;
+let liveType = "pre";
+let pollOpen = false;
+let refreshInterval = null;
+let startTime = null;
+let timerInterval = null;
+
+function initSessions() {
+  const s = [];
+  for(let i=0;i<7;i++) s.push({
+    id: i,
+    topic: `Session ${i+1}`,
+    pre: { question: "", options: ["","","",""], correct: 0 },
+    post: { question: "", options: ["","","",""], correct: 0 },
+    sameQuestion: false,
+    preAnswered: false,
+    postAnswered: false
+  });
+  return s;
+}
+
+function save() { localStorage.setItem("quizSessions", JSON.stringify(sessions)); }
+
+function toast(msg) {
+  const el = document.getElementById("toast");
+  el.textContent = msg;
+  el.classList.add("show");
+  setTimeout(() => el.classList.remove("show"), 2500);
+}
+
+function switchTab(name) {
+  document.querySelectorAll(".tab").forEach((t,i) => t.classList.toggle("active", ["setup","live","results","export"][i]===name));
+  document.querySelectorAll(".tab-content").forEach(t => t.classList.remove("active"));
+  document.getElementById("tab-"+name).classList.add("active");
+  if(name==="live") initLiveTab();
+}
+
+// ---- SETUP ----
+function renderSidebar() {
+  const list = document.getElementById("sessionList");
+  list.innerHTML = sessions.map((s,i) => `
+    <div class="session-item${i===currentEditSession?" active":""}" onclick="selectSession(${i})">
+      <div class="session-num">${i+1}</div>
+      <div class="session-info">
+        <div class="session-title">${s.topic||"Session "+(i+1)}</div>
+        <div class="session-badges">
+          <span class="badge ${s.preAnswered?"done":"pre"}">${s.preAnswered?"pre ✓":"pre"}</span>
+          <span class="badge ${s.postAnswered?"done":"post"}">${s.postAnswered?"post ✓":"post"}</span>
+        </div>
+      </div>
+    </div>
+  `).join("");
+}
+
+function selectSession(i) {
+  currentEditSession = i;
+  renderSidebar();
+  loadSessionToForm(i);
+}
+
+function loadSessionToForm(i) {
+  const s = sessions[i];
+  document.getElementById("editingSession").textContent = `Session ${i+1}`;
+  document.getElementById("sessionTopic").value = s.topic;
+  document.getElementById("preQuestion").value = s.pre.question;
+  document.getElementById("sameAsPost").checked = s.sameQuestion;
+  document.getElementById("postFields").style.display = s.sameQuestion ? "none" : "block";
+  document.getElementById("postQuestion").value = s.post.question;
+  renderOptions("pre", s.pre.options, s.pre.correct);
+  renderOptions("post", s.post.options, s.post.correct);
+}
+
+function renderOptions(type, opts, correct) {
+  const container = document.getElementById(type+"Options");
+  container.innerHTML = opts.map((o,i) => `
+    <div class="option-row${i===correct?" correct":""}" id="${type}opt${i}">
+      <div class="option-letter">${LETTERS[i]}</div>
+      <input type="text" value="${o}" oninput="updateOption('${type}',${i},this.value)" placeholder="ตัวเลือก ${LETTERS[i]}">
+      <button class="correct-toggle${i===correct?" active":""}" onclick="setCorrect('${type}',${i})" title="ทำเครื่องหมายเป็นคำตอบที่ถูก">✓</button>
+    </div>
+  `).join("");
+}
+
+function addOption(type) {
+  const s = sessions[currentEditSession];
+  const obj = s[type];
+  if(obj.options.length >= 5) return toast("มีตัวเลือกสูงสุด 5 ข้อ");
+  obj.options.push("");
+  renderOptions(type, obj.options, obj.correct);
+}
+
+function updateOption(type,i,val) { sessions[currentEditSession][type].options[i] = val; }
+
+function setCorrect(type,i) {
+  sessions[currentEditSession][type].correct = i;
+  renderOptions(type, sessions[currentEditSession][type].options, i);
+}
+
+function toggleSameAsPost() {
+  const same = document.getElementById("sameAsPost").checked;
+  sessions[currentEditSession].sameQuestion = same;
+  document.getElementById("postFields").style.display = same ? "none" : "block";
+}
+
+function saveSession() {
+  const s = sessions[currentEditSession];
+  s.topic = document.getElementById("sessionTopic").value;
+  s.pre.question = document.getElementById("preQuestion").value;
+  if(!s.sameQuestion) s.post.question = document.getElementById("postQuestion").value;
+  else { s.post.question = s.pre.question; s.post.options = [...s.pre.options]; s.post.correct = s.pre.correct; }
+  s.preAnswered = s.pre.question.trim().length > 0;
+  s.postAnswered = s.post.question.trim().length > 0;
+  save();
+  renderSidebar();
+  toast("✓ บันทึกแล้ว");
+}
+
+function clearSession() { loadSessionToForm(currentEditSession); }
+
+// ---- LIVE ----
+function initLiveTab() {
+  const sel = document.getElementById("sessionSelect");
+  sel.innerHTML = `<option value="">— เลือก Session —</option>` +
+    sessions.map((s,i) => `<option value="${i}">${i+1}. ${s.topic||"Session "+(i+1)}</option>`).join("");
+
+  const pUrl = PARTICIPANT_URL !== "https://chantimas.github.io/airspacesafety/participant.html" ? PARTICIPANT_URL : null;
+  if(pUrl) {
+    document.getElementById("joinUrl").textContent = pUrl;
+    if(document.getElementById("qrCode").classList.contains("qr-placeholder")) {
+      document.getElementById("qrCode").innerHTML = "";
+      document.getElementById("qrCode").className = "";
+      new QRCode(document.getElementById("qrCode"), { text: pUrl, width: 140, height: 140, colorDark: "#e8edf5", colorLight: "#111827" });
+    }
+  }
+
+  checkConnection();
+}
+
+function selectLiveSession(val) {
+  if(val==="") return;
+  liveSession = parseInt(val);
+  liveType = "pre";
+  const s = sessions[liveSession];
+  document.getElementById("liveSessionTitle").textContent = s.topic;
+  document.getElementById("liveSessionSub").textContent = `Session ${liveSession+1}`;
+  document.getElementById("liveQuestion").textContent = s.pre.question || "(ยังไม่ได้ใส่คำถาม)";
+  document.getElementById("typeBadge").textContent = "PRE";
+  document.getElementById("typeBadge").className = "type-badge pre";
+  document.getElementById("btnOpen").textContent = "▶ เปิดคำถาม Pre-test";
+  document.getElementById("btnOpen").disabled = false;
+  document.getElementById("btnClose").disabled = true;
+  document.getElementById("btnNext").disabled = true;
+  renderLiveChart([], sessions[liveSession][liveType].options, sessions[liveSession][liveType].correct);
+}
+
+function renderLiveChart(counts, options, correct) {
+  const total = counts.reduce((a,b)=>a+b,0);
+  document.getElementById("liveChart").innerHTML = options.map((o,i) => {
+    const pct = total > 0 ? Math.round(counts[i]/total*100) : 0;
+    const cls = correct===i ? "correct-bar" : "neutral-bar";
+    return `
+      <div class="bar-row">
+        <div class="bar-label">${LETTERS[i]}</div>
+        <div class="bar-wrap">
+          <div class="bar-fill ${cls}" style="width:${pct}%">${pct>8?pct+"%":""}</div>
+        </div>
+        <div class="bar-count">${counts[i]||0}</div>
+      </div>
+    `;
+  }).join("");
+}
+
+async function openPoll() {
+  if(liveSession===null) return toast("เลือก Session ก่อน");
+  const s = sessions[liveSession];
+  const q = s[liveType];
+  pollOpen = true;
+  startTime = Date.now();
+
+  document.getElementById("btnOpen").disabled = true;
+  document.getElementById("btnClose").disabled = false;
+  document.getElementById("liveQuestion").textContent = q.question;
+  document.getElementById("typeBadge").textContent = liveType.toUpperCase();
+  document.getElementById("typeBadge").className = `type-badge ${liveType}`;
+  document.getElementById("connDot").className = "dot live";
+  document.getElementById("connText").textContent = "Live";
+
+  timerInterval = setInterval(() => {
+    const sec = Math.floor((Date.now()-startTime)/1000);
+    document.getElementById("statTime").textContent = sec+"s";
+  }, 1000);
+
+  await apiCall({ action:"setState", currentSession:liveSession, currentType:liveType, isOpen:"true", questions:JSON.stringify(q) });
+  refreshInterval = setInterval(refreshResults2, 2000);
+}
+
+async function closePoll() {
+  pollOpen = false;
+  clearInterval(refreshInterval);
+  clearInterval(timerInterval);
+  document.getElementById("btnClose").disabled = true;
+  document.getElementById("btnNext").disabled = false;
+  document.getElementById("connDot").className = "dot";
+  document.getElementById("connText").textContent = "Poll closed";
+  await apiCall({ action:"setState", currentSession:liveSession, currentType:liveType, isOpen:"false", questions:JSON.stringify(sessions[liveSession][liveType]) });
+  await refreshResults2();
+}
+
+async function nextPhase() {
+  if(liveType==="pre") {
+    liveType = "post";
+    document.getElementById("btnOpen").textContent = "▶ เปิดคำถาม Post-test";
+    document.getElementById("btnOpen").disabled = false;
+    document.getElementById("btnNext").disabled = true;
+    document.getElementById("liveQuestion").textContent = sessions[liveSession].post.question;
+    document.getElementById("typeBadge").textContent = "POST";
+    document.getElementById("typeBadge").className = "type-badge post";
+    renderLiveChart([], sessions[liveSession].post.options, sessions[liveSession].post.correct);
+    toast("พร้อมสำหรับ Post-test");
+  } else {
+    toast("Session นี้เสร็จแล้ว ✓");
+    document.getElementById("btnNext").disabled = true;
+  }
+}
+
+async function refreshResults2() {
+  if(liveSession===null) return;
+  const data = await apiCall({ action:"getResults", session:liveSession, type:liveType });
+  if(!data.results) return;
+  const key = `${liveSession}_${liveType}_0`;
+  const res = data.results[key];
+  if(!res) return;
+  const q = sessions[liveSession][liveType];
+  const counts = q.options.map((_,i) => res.counts[LETTERS[i]]||0);
+  renderLiveChart(counts, q.options, q.correct);
+  document.getElementById("statTotal").textContent = res.total;
+  const correctCount = res.counts[LETTERS[q.correct]]||0;
+  document.getElementById("statCorrect").textContent = res.total>0 ? Math.round(correctCount/res.total*100)+"%" : "—";
+}
+
+async function showComparison() {
+  if(liveSession===null) return toast("เลือก Session ก่อน");
+  const data = await apiCall({ action:"getResults", session:liveSession });
+  if(!data.results) return;
+  const s = sessions[liveSession];
+  const preKey = `${liveSession}_pre_0`;
+  const postKey = `${liveSession}_post_0`;
+  const pre = data.results[preKey];
+  const post = data.results[postKey];
+  if(!pre||!post) return toast("ยังไม่มีข้อมูลทั้ง pre และ post");
+
+  const area = document.getElementById("comparisonArea");
+  area.style.display = "block";
+  const opts = s.pre.options;
+  const maxTotal = Math.max(pre.total, post.total, 1);
+  document.getElementById("compBars").innerHTML = opts.map((o,i) => {
+    const preC = pre.counts[LETTERS[i]]||0;
+    const postC = post.counts[LETTERS[i]]||0;
+    const prePct = Math.round(preC/pre.total*100);
+    const postPct = Math.round(postC/post.total*100);
+    return `
+      <div class="comp-bar-row">
+        <div class="comp-labels"><span>${LETTERS[i]}. ${o}</span><span>PRE ${prePct}% → POST ${postPct}%</span></div>
+        <div class="comp-bars">
+          <div class="comp-bar pre-bar" style="width:${prePct}%">PRE ${prePct}%</div>
+          <div class="comp-bar post-bar" style="width:${postPct}%">POST ${postPct}%</div>
+        </div>
+      </div>
+    `;
+  }).join("");
+  toast("แสดง Comparison แล้ว");
+}
+
+// ---- RESULTS & EXPORT ----
+async function loadAllResults() {
+  const data = await apiCall({ action:"getAllData" });
+  if(!data.data) return;
+  const rows = data.data;
+  if(rows.length===0) { document.getElementById("allResults").textContent = "ยังไม่มีข้อมูล"; return; }
+
+  const bySession = {};
+  rows.forEach(r => {
+    const key = `${r.session}_${r.type}`;
+    if(!bySession[key]) bySession[key] = { session:r.session, type:r.type, answers:{}, total:0 };
+    bySession[key].answers[r.answer] = (bySession[key].answers[r.answer]||0)+1;
+    bySession[key].total++;
+  });
+
+  document.getElementById("allResults").innerHTML = Object.entries(bySession).map(([k,v]) => {
+    const s = sessions[v.session];
+    const q = s?.[v.type];
+    const correctKey = q ? LETTERS[q.correct] : null;
+    const correctCount = correctKey ? (v.answers[correctKey]||0) : 0;
+    const pct = v.total>0 ? Math.round(correctCount/v.total*100) : 0;
+    return `
+      <div style="padding:14px; background:var(--surface2); border-radius:8px; margin-bottom:10px;">
+        <div style="font-weight:500; margin-bottom:6px">${s?.topic||"Session "+(parseInt(v.session)+1)} — <span style="color:var(--${v.type==="pre"?"pre":"post"})">${v.type.toUpperCase()}</span></div>
+        <div style="font-size:13px; color:var(--muted)">ตอบแล้ว ${v.total} คน · ตอบถูก ${pct}%</div>
+      </div>
+    `;
+  }).join("");
+}
+
+async function exportCSV() {
+  const data = await apiCall({ action:"getAllData" });
+  if(!data.data) return toast("ไม่มีข้อมูล");
+  const headers = ["timestamp","session","session_topic","type","questionIndex","answer","is_correct"];
+  const rows = data.data.map(r => {
+    const s = sessions[r.session];
+    const q = s?.[r.type];
+    const correct = q ? LETTERS[q.correct]===r.answer : "";
+    return [r.timestamp, parseInt(r.session)+1, s?.topic||"", r.type, r.questionIndex, r.answer, correct?"1":"0"];
+  });
+  const csv = [headers, ...rows].map(r => r.map(c => `"${c}"`).join(",")).join("\n");
+  const blob = new Blob(["\uFEFF"+csv], {type:"text/csv;charset=utf-8"});
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "icao_quiz_results.csv";
+  a.click();
+  toast("⬇ ดาวน์โหลดแล้ว");
+}
+
+async function viewSummary() {
+  await loadAllResults();
+  switchTab("results");
+}
+
+// ---- API ----
+async function apiCall(params) {
+  if(SCRIPT_URL === "https://script.google.com/macros/s/AKfycby_dhdIt0uCOBln8cdLK2pO9tNrucIZStUpYt3ABvgg0h3u_YO5ZNIEzcFGs8MB8N0z/exec") {
+    document.getElementById("configNotice").style.display = "block";
+    return {};
+  }
+  document.getElementById("configNotice").style.display = "none";
+  try {
+    const url = SCRIPT_URL + "?" + new URLSearchParams(params);
+    const res = await fetch(url);
+    return await res.json();
+  } catch(e) { console.error(e); return {}; }
+}
+
+async function checkConnection() {
+  if(SCRIPT_URL === "https://script.google.com/macros/s/AKfycby_dhdIt0uCOBln8cdLK2pO9tNrucIZStUpYt3ABvgg0h3u_YO5ZNIEzcFGs8MB8N0z/exec") return;
+  const data = await apiCall({ action:"getState" });
+  if(data.currentSession !== undefined) {
+    document.getElementById("connDot").className = "dot";
+    document.getElementById("connText").textContent = "Connected";
+    toast("✓ เชื่อมต่อ Google Apps Script แล้ว");
+  }
+}
+
+async function refreshResults() { await refreshResults2(); }
+
+function copyUrl() {
+  const url = document.getElementById("joinUrl").textContent;
+  navigator.clipboard.writeText(url).then(() => toast("คัดลอก URL แล้ว"));
+}
+
+// ---- INIT ----
+renderSidebar();
+selectSession(0);
+</script>
+</body>
+</html>
