@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>ICAO Seminar — Quiz</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f8f9fc;
+    --surface: #ffffff;
+    --border: rgba(0,0,0,0.08);
+    --text: #0f1724;
+    --muted: #6b7a96;
+    --accent: #1d4ed8;
+    --accent-light: #eff3ff;
+    --green: #059669;
+    --green-light: #ecfdf5;
+    --red: #dc2626;
+    --red-light: #fef2f2;
+    --pre: #4f46e5;
+    --post: #059669;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'IBM Plex Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+  header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 12px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .logo-text {
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-weight: 500;
+  }
+  .type-pill {
+    font-size: 11px;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+  }
+  .type-pill.pre { background: #ede9fe; color: var(--pre); }
+  .type-pill.post { background: #d1fae5; color: var(--post); }
+
+  .main {
+    flex: 1;
+    max-width: 500px;
+    margin: 0 auto;
+    width: 100%;
+    padding: 24px 20px;
+  }
+
+  .waiting-screen {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 20px;
+    text-align: center;
+    gap: 16px;
+  }
+  .waiting-icon {
+    width: 60px; height: 60px;
+    border-radius: 50%;
+    background: var(--accent-light);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 24px;
+  }
+  .waiting-title { font-size: 18px; font-weight: 500; }
+  .waiting-sub { font-size: 14px; color: var(--muted); line-height: 1.6; }
+  .pulse-ring {
+    width: 60px; height: 60px;
+    border-radius: 50%;
+    border: 2px solid var(--accent);
+    animation: ring 1.8s infinite;
+    position: absolute;
+  }
+  @keyframes ring { 0%{transform:scale(1);opacity:0.6} 100%{transform:scale(1.8);opacity:0} }
+  .pulse-wrap { position: relative; width: 60px; height: 60px; display: flex; align-items: center; justify-content: center; }
+
+  .question-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 24px;
+    margin-bottom: 16px;
+  }
+  .session-label {
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+  .question-text {
+    font-size: 17px;
+    line-height: 1.65;
+    font-weight: 400;
+  }
+
+  .options-list { display: flex; flex-direction: column; gap: 10px; }
+  .option-btn {
+    width: 100%;
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    cursor: pointer;
+    transition: all 0.15s;
+    text-align: left;
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 15px;
+    color: var(--text);
+  }
+  .option-btn:hover { border-color: rgba(29,78,216,0.3); background: var(--accent-light); }
+  .option-btn.selected { border-color: var(--accent); background: var(--accent-light); }
+  .option-btn.correct { border-color: var(--green); background: var(--green-light); }
+  .option-btn.wrong { border-color: var(--red); background: var(--red-light); }
+  .option-btn.disabled { cursor: default; pointer-events: none; }
+
+  .opt-letter {
+    width: 32px; height: 32px;
+    border-radius: 8px;
+    background: rgba(0,0,0,0.05);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px;
+    font-weight: 600;
+    flex-shrink: 0;
+  }
+  .option-btn.selected .opt-letter { background: var(--accent); color: #fff; }
+  .option-btn.correct .opt-letter { background: var(--green); color: #fff; }
+  .option-btn.wrong .opt-letter { background: var(--red); color: #fff; }
+
+  .submit-btn {
+    width: 100%;
+    padding: 15px;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s;
+    margin-top: 16px;
+  }
+  .submit-btn:hover { background: #1e40af; }
+  .submit-btn:active { transform: scale(0.98); }
+  .submit-btn:disabled { background: #c7d2fe; cursor: default; }
+
+  .result-card {
+    background: var(--surface);
+    border-radius: 16px;
+    padding: 28px 24px;
+    text-align: center;
+    border: 1px solid var(--border);
+  }
+  .result-icon { font-size: 40px; margin-bottom: 12px; }
+  .result-title { font-size: 20px; font-weight: 500; margin-bottom: 8px; }
+  .result-sub { font-size: 14px; color: var(--muted); line-height: 1.6; }
+  .result-card.correct-result { border-color: var(--green); }
+  .result-card.wrong-result { border-color: rgba(220,38,38,0.3); }
+
+  .participant-id {
+    font-size: 11px;
+    color: var(--muted);
+    text-align: center;
+    margin-top: 20px;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo-text">ICAO Seminar</div>
+  <span class="type-pill pre" id="typePill">—</span>
+</header>
+
+<div class="main" id="mainContent">
+  <div class="waiting-screen" id="waitingScreen">
+    <div class="pulse-wrap">
+      <div class="pulse-ring"></div>
+      <div class="waiting-icon">✈</div>
+    </div>
+    <div class="waiting-title">รอเริ่มการทดสอบ</div>
+    <div class="waiting-sub">กรุณารอ Host เปิดคำถาม<br>หน้านี้จะอัพเดทอัตโนมัติ</div>
+  </div>
+
+  <div id="questionScreen" style="display:none">
+    <div class="question-card">
+      <div class="session-label" id="sessionLabel">Session 1</div>
+      <div class="question-text" id="questionText">—</div>
+    </div>
+    <div class="options-list" id="optionsList"></div>
+    <button class="submit-btn" id="submitBtn" onclick="submitAnswer()" disabled>เลือกคำตอบก่อน</button>
+  </div>
+
+  <div id="resultScreen" style="display:none">
+    <div class="result-card" id="resultCard">
+      <div class="result-icon" id="resultIcon">—</div>
+      <div class="result-title" id="resultTitle">—</div>
+      <div class="result-sub" id="resultSub">—</div>
+    </div>
+    <p class="participant-id">ID: <span id="pidDisplay"></span></p>
+  </div>
+
+  <div id="closedScreen" style="display:none">
+    <div class="waiting-screen">
+      <div class="waiting-icon">⏸</div>
+      <div class="waiting-title">ปิดรับคำตอบแล้ว</div>
+      <div class="waiting-sub">รอ Host เปิดคำถามถัดไป</div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// ⚙️ CONFIG — แก้ตรงนี้ให้ตรงกับ host.html
+// ============================================================
+const SCRIPT_URL = "YOUR_GOOGLE_APPS_SCRIPT_URL_HERE";
+// ============================================================
+
+const LETTERS = ["A","B","C","D","E"];
+let participantId = localStorage.getItem("pid") || ("P" + Math.random().toString(36).slice(2,7).toUpperCase());
+localStorage.setItem("pid", participantId);
+document.getElementById("pidDisplay").textContent = participantId;
+
+let lastState = null;
+let selectedAnswer = null;
+let answered = {};
+let pollInterval = null;
+
+function showScreen(name) {
+  ["waitingScreen","questionScreen","resultScreen","closedScreen"].forEach(s => {
+    document.getElementById(s).style.display = s===name+"Screen" ? "block" : "none";
+  });
+}
+
+async function poll() {
+  try {
+    const url = SCRIPT_URL + "?" + new URLSearchParams({ action: "getState" });
+    const res = await fetch(url);
+    const state = await res.json();
+
+    const stateKey = `${state.currentSession}_${state.currentType}`;
+    const alreadyAnswered = answered[stateKey];
+
+    if(!state.isOpen) {
+      if(alreadyAnswered) {
+        // stay on result
+      } else {
+        showScreen("closed");
+        document.getElementById("typePill").textContent = "—";
+        document.getElementById("typePill").className = "type-pill";
+      }
+      return;
+    }
+
+    const q = typeof state.questions === "string" ? JSON.parse(state.questions) : state.questions;
+    if(!q || !q.question) return;
+
+    document.getElementById("typePill").textContent = state.currentType.toUpperCase();
+    document.getElementById("typePill").className = `type-pill ${state.currentType}`;
+
+    if(alreadyAnswered) {
+      showAnsweredResult(alreadyAnswered, q);
+      return;
+    }
+
+    if(JSON.stringify(lastState) !== JSON.stringify({ session: state.currentSession, type: state.currentType })) {
+      lastState = { session: state.currentSession, type: state.currentType };
+      selectedAnswer = null;
+      renderQuestion(state.currentSession, state.currentType, q);
+    }
+  } catch(e) { console.error(e); }
+}
+
+function renderQuestion(session, type, q) {
+  const sessions = ["Session 1","Session 2","Session 3","Session 4","Session 5","Session 6","Session 7"];
+  document.getElementById("sessionLabel").textContent = sessions[session] + " — " + type.toUpperCase() + "-TEST";
+  document.getElementById("questionText").textContent = q.question;
+
+  document.getElementById("optionsList").innerHTML = q.options.map((o,i) => `
+    <button class="option-btn" id="opt${i}" onclick="selectOption(${i},'${LETTERS[i]}')">
+      <div class="opt-letter">${LETTERS[i]}</div>
+      <span>${o}</span>
+    </button>
+  `).join("");
+
+  document.getElementById("submitBtn").disabled = true;
+  document.getElementById("submitBtn").textContent = "เลือกคำตอบก่อน";
+  showScreen("question");
+}
+
+function selectOption(i, letter) {
+  selectedAnswer = letter;
+  document.querySelectorAll(".option-btn").forEach((b,j) => {
+    b.classList.toggle("selected", j===i);
+  });
+  document.getElementById("submitBtn").disabled = false;
+  document.getElementById("submitBtn").textContent = "ยืนยันคำตอบ →";
+}
+
+async function submitAnswer() {
+  if(!selectedAnswer || !lastState) return;
+  document.getElementById("submitBtn").disabled = true;
+  document.getElementById("submitBtn").textContent = "กำลังส่ง...";
+
+  const stateKey = `${lastState.session}_${lastState.type}`;
+
+  try {
+    const url = SCRIPT_URL + "?" + new URLSearchParams({
+      action: "submitAnswer",
+      session: lastState.session,
+      type: lastState.type,
+      questionIndex: 0,
+      answer: selectedAnswer,
+      participantId
+    });
+    await fetch(url);
+  } catch(e) { console.error(e); }
+
+  answered[stateKey] = selectedAnswer;
+  const stateRes = await fetch(SCRIPT_URL + "?" + new URLSearchParams({ action: "getState" }));
+  const state = await stateRes.json();
+  const q = typeof state.questions === "string" ? JSON.parse(state.questions) : state.questions;
+  showAnsweredResult(selectedAnswer, q);
+}
+
+function showAnsweredResult(answer, q) {
+  const isCorrect = answer === LETTERS[q.correct];
+  const card = document.getElementById("resultCard");
+  card.className = `result-card ${isCorrect?"correct-result":"wrong-result"}`;
+  document.getElementById("resultIcon").textContent = isCorrect ? "✅" : "❌";
+  document.getElementById("resultTitle").textContent = isCorrect ? "ถูกต้อง!" : "ไม่ถูกต้อง";
+  document.getElementById("resultSub").innerHTML = isCorrect
+    ? `คำตอบที่ถูกคือ <strong>${LETTERS[q.correct]}. ${q.options[q.correct]}</strong>`
+    : `คุณตอบ <strong>${answer}</strong> — คำตอบที่ถูกคือ <strong>${LETTERS[q.correct]}. ${q.options[q.correct]}</strong>`;
+  showScreen("result");
+}
+
+if(SCRIPT_URL !== "YOUR_GOOGLE_APPS_SCRIPT_URL_HERE") {
+  poll();
+  pollInterval = setInterval(poll, 3000);
+} else {
+  document.getElementById("waitingScreen").querySelector(".waiting-sub").textContent = "⚠️ ยังไม่ได้ตั้งค่า SCRIPT_URL";
+}
+</script>
+</body>
+</html>
